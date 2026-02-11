@@ -1,0 +1,62 @@
+[
+    {
+        "id": 1,
+        "name": "麺屋 武蔵",
+        "lat": 35.6948,
+        "lng": 139.7036,
+        "type": "豚骨魚介",
+        "rating": 4.5,
+        "reviewer": "部長",
+        "image": "dosukoi_ramen_hero.png",
+        "is_ramen": true,
+        "description": "濃厚なスープと極太麺が最高。まさに武士のような一杯。"
+    },
+    {
+        "id": 2,
+        "name": " AFURI",
+        "lat": 35.6466,
+        "lng": 139.7101,
+        "type": "塩",
+        "rating": 4.2,
+        "reviewer": "副部長",
+        "image": "dosukoi_ramen_hero.png", 
+        "is_ramen": true,
+        "description": "柚子の香りが爽やか。繊細な味わい。"
+    },
+    {
+        "id": 3,
+        "name": "とんかつ まい泉",
+        "lat": 35.6653,
+        "lng": 139.7112,
+        "type": "カツ丼",
+        "rating": 4.8,
+        "reviewer": "新入部員",
+        "image": "dosukoi_ramen_hero.png", 
+        "is_ramen": false,
+        "description": "箸で切れる柔らかさ。裏どすこいの真打ち。"
+    },
+    {
+        "id": 4,
+        "name": "カレーハウス CoCo壱番屋",
+        "lat": 35.6980,
+        "lng": 139.7710,
+        "type": "カレー",
+        "rating": 3.9,
+        "reviewer": "平部員",
+        "image": "dosukoi_ramen_hero.png", 
+        "is_ramen": false, 
+        "description": "安定の味。トッピング全部乗せが裏メニュー。"
+    },
+    {
+        "id": 5,
+        "name": "蒙古タンメン中本",
+        "lat": 35.7295,
+        "lng": 139.7109,
+        "type": "激辛",
+        "rating": 4.7,
+        "reviewer": "激辛担当",
+        "image": "dosukoi_ramen_hero.png", 
+        "is_ramen": true,
+        "description": "辛さの中に旨みがある。北極ラーメンこそ至高。"
+    }
+]

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>巡業マップ | どすこいラーメン部</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Rampart+One&family=Reggae+One&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        #map-page-container {
+            padding: 2rem 0;
+            min-height: calc(100vh - 200px);
+        }
+
+        #map {
+            height: 600px;
+            width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: var(--color-primary);
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            #map {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <div class="logo-container" style="display: flex; align-items: center; gap: 1rem;">
+            <div class="logo">どすこい巡業マップ</div>
+            <button id="ura-toggle" class="ura-toggle" title="裏どすこい（定食・その他）へ">🍚 裏口</button>
+        </div>
+        <div class="mobile-menu-btn" id="mobile-menu-btn">☰</div>
+        <nav class="nav" id="main-nav">
+            <ul>
+                <li><a href="index.html">トップページ</a></li>
+                <li><a href="index.html#activities">活動</a></li>
+                <li><a href="./members.html?v=4">部員</a></li>
+                <li id="report-nav" style="display: none;"><a href="./report.html">戦果を報告する</a></li>
+                <li id="admin-nav" style="display: none;"><a href="./admin.html">管理室</a></li>
+                <li><a href="#" id="login-trigger-header" style="font-size: 0.8rem; opacity: 0.7;">部員ログイン</a></li>
+                <li id="edit-profile-nav" style="display: none;"><a href="#" onclick="openEditProfile()"
+                        style="font-size: 0.8rem; opacity: 0.7;">プロフィール編集</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container" id="map-page-container">
+        <a href="index.html" class="back-link">← トップページに戻る</a>
+        <h2 style="text-align: center; margin-bottom: 2rem; font-family: var(--font-heading);">巡業中。</h2>
+        <div id="map"></div>
+        <p style="margin-top: 1.5rem; color: #666; font-size: 0.9rem; text-align: center;">
+            ※赤いピンは部員による実戦報告（レポート）です。
+        </p>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 Dosukoi Ramen Club. All Rights Reserved.</p>
+    </footer>
+
+    <!-- Modals (Copied for functionality) -->
+    <div id="login-modal" class="modal">
+        <!-- (omitted for brevity, shared script handles it) -->
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js?v=25"></script>
+</body>
+
+</html>

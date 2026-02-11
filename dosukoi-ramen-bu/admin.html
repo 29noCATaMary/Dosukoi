@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理室 | どすこいラーメン部</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Rampart+One&family=Reggae+One&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .admin-panel {
+            background: white;
+            padding: 2rem;
+            margin: 2rem auto;
+            max-width: 900px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            border-bottom: 2px solid var(--color-primary);
+            padding-bottom: 0.5rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .scroll-table {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background-color: #fcfcfc;
+            color: #666;
+            font-weight: bold;
+        }
+
+        .delete-btn {
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: 0.2s;
+        }
+
+        .delete-btn:hover {
+            background: #cc0000;
+            transform: scale(1.05);
+        }
+
+        .loading-overlay {
+            text-align: center;
+            padding: 2rem;
+            color: #999;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <div class="logo">どすこい管理室</div>
+        <nav class="nav">
+            <ul>
+                <li><a href="index.html">← サイトに戻る</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div id="auth-check" class="loading-overlay">
+            アクセス権限を確認中...
+        </div>
+
+        <div id="admin-content" style="display: none;">
+            <div class="admin-panel">
+                <h2>部員名簿</h2>
+                <div class="scroll-table">
+                    <table id="member-table">
+                        <thead>
+                            <tr>
+                                <th>ニックネーム</th>
+                                <th>ID (UUID)</th>
+                                <th>管理者</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <h2>戦果一覧（管理用）</h2>
+                <div class="scroll-table">
+                    <table id="report-table">
+                        <thead>
+                            <tr>
+                                <th>店名</th>
+                                <th>報告者</th>
+                                <th>日付</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const SUPABASE_URL = 'https://gjvxavvhfdgnnudpqqfa.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdqdnhhdnZoZmRnbm51ZHBxcWZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA2NTIyNjgsImV4cCI6MjA4NjIyODI2OH0.WcVi6fT5q0gojOt4ZEOKzMm6xaO4qrvXvb7LtCZCN_8';
+        const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        async function initAdmin() {
+            console.log("Admin initialization started...");
+            const authCheckDiv = document.getElementById('auth-check');
+
+            try {
+                // 1. Session Check
+                console.log("Checking session...");
+                const { data: { session }, error: sessionErr } = await sb.auth.getSession();
+                if (sessionErr) {
+                    console.error("Session Check Error:", sessionErr);
+                    authCheckDiv.innerHTML = "セッション確認エラー: " + sessionErr.message;
+                    return;
+                }
+
+                if (!session) {
+                    console.warn("No session found. Redirecting...");
+                    alert('ログインが必要です。最初に戻ります。');
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                console.log("Session found for user:", session.user.id);
+
+                // 2. Admin Check
+                console.log("Checking admin status in profiles table...");
+                const { data: profile, error: profileError } = await sb
+                    .from('profiles')
+                    .select('is_admin')
+                    .eq('id', session.user.id)
+                    .single();
+
+                if (profileError) {
+                    console.error("Profile Fetch Error:", profileError);
+                    authCheckDiv.innerHTML = "権限確認エラー: " + profileError.message;
+                    return;
+                }
+
+                if (!profile || !profile.is_admin) {
+                    console.warn("User is not an admin.");
+                    alert('管理者権限がありません。トップに戻ります。');
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                console.log("Admin access granted.");
+                // Show Content
+                authCheckDiv.style.display = 'none';
+                document.getElementById('admin-content').style.display = 'block';
+
+                loadMembers();
+                loadReports();
+
+            } catch (err) {
+                console.error("Initialization exception:", err);
+                authCheckDiv.innerHTML = "システムエラーが発生しました: " + err.message;
+            }
+        }
+
+        async function loadMembers() {
+            const tbody = document.querySelector('#member-table tbody');
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">読込中...</td></tr>';
+
+            const { data, error } = await sb
+                .from('profiles')
+                .select('*')
+                .order('nickname');
+
+            if (error) {
+                console.error(error);
+                return;
+            }
+
+            tbody.innerHTML = '';
+            data.forEach(m => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${m.nickname || '未設定'}</td>
+                    <td><small style="color:#999;">${m.id}</small></td>
+                    <td>${m.is_admin ? '✅' : '-'}</td>
+                    <td>
+                        <button class="delete-btn" onclick="deleteMember('${m.id}', '${m.nickname}')">除名</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function deleteMember(id, name) {
+            if (!confirm(`部員「${name}」を除名しますか？\n※この操作は元に戻せません。`)) return;
+
+            const { error } = await sb.from('profiles').delete().eq('id', id);
+            if (error) {
+                alert('エラーが発生しました: ' + error.message);
+            } else {
+                alert('除名しました。');
+                loadMembers();
+            }
+        }
+
+        async function loadReports() {
+            const tbody = document.querySelector('#report-table tbody');
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">読込中...</td></tr>';
+
+            // Join for nickname
+            let { data, error } = await sb
+                .from('reports')
+                .select('id, shop_name, created_at, profiles(nickname)')
+                .order('created_at', { ascending: false });
+
+            // Fallback
+            if (error && error.message.includes("relationship")) {
+                const res = await sb.from('reports').select('*').order('created_at', { ascending: false });
+                data = res.data;
+                error = res.error;
+            }
+
+            if (error) {
+                console.error(error);
+                return;
+            }
+
+            tbody.innerHTML = '';
+            data.forEach(r => {
+                const date = new Date(r.created_at).toLocaleDateString('ja-JP');
+                const nick = r.profiles ? r.profiles.nickname : '不明';
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="font-weight:bold;">${r.shop_name}</td>
+                    <td>${nick}</td>
+                    <td>${date}</td>
+                    <td>
+                        <button class="delete-btn" onclick="deleteReport('${r.id}', '${r.shop_name}')">削除</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function deleteReport(id, shop) {
+            if (!confirm(`「${shop}」の戦果を削除しますか？\n※この操作は元に戻せません。`)) return;
+
+            console.log("Attempting to delete report:", id);
+            const { error } = await sb.from('reports').delete().eq('id', id);
+            if (error) {
+                console.error("Delete Report Error:", error);
+                alert('削除に失敗しました。\nエラー: ' + error.message + '\n詳細はコンソールを確認してください。');
+            } else {
+                alert('削除しました。');
+                loadReports();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', initAdmin);
+    </script>
+</body>
+
+</html>

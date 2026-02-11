@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>動作テスト</title>
+</head>
+
+<body>
+    <h1>JavaScriptテスト</h1>
+    <button id="test-btn">このボタンを押してください</button>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        alert("スクリプトが読み込まれました！");
+
+        document.getElementById('test-btn').onclick = function () {
+            alert("ボタンが押されました！");
+        };
+
+        console.log("Supabase SDK:", window.supabase);
+    </script>
+</body>
+
+</html>
