@@ -1,0 +1,516 @@
+/* Ura Mode Variables */
+body.ura-mode {
+    --color-primary: #7B1FA2;
+    /* Deep Purple */
+    --color-secondary: #000000;
+    /* Pitch Black */
+    --color-accent: #E0E0E0;
+    /* Dull Grey/White */
+    --color-bg: #121212;
+    /* Dark BG */
+    --color-text: #E0E0E0;
+}
+
+body.ura-mode .card {
+    background: #333;
+    color: #fff;
+    border-top: 5px solid var(--color-primary);
+}
+
+body.ura-mode .header,
+body.ura-mode .footer {
+    background-color: #000;
+}
+
+/* Regular Variables */
+:root {
+    --color-primary: #D32F2F;
+    /* Ramen Red */
+    --color-secondary: #212121;
+    /* Sumo Black */
+    --color-accent: #FFC107;
+    /* Noodle Gold */
+    --color-text: #333;
+    --color-bg: #FAFAFA;
+    --font-heading: 'Reggae One', system-ui, sans-serif;
+    --font-body: 'Zen Kaku Gothic New', sans-serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-body);
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    line-height: 1.6;
+}
+
+h1,
+h2,
+h3 {
+    font-family: var(--font-heading);
+    font-weight: 400;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+/* Header */
+.header {
+    background-color: var(--color-secondary);
+    color: white;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.mobile-menu-btn {
+    display: none;
+    font-size: 2rem;
+    cursor: pointer;
+    color: var(--color-primary);
+}
+
+.logo {
+    font-family: 'Rampart One', cursive;
+    font-size: 1.8rem;
+    color: var(--color-primary);
+    text-shadow: 2px 2px 0 #fff;
+}
+
+.nav ul {
+    display: flex;
+    list-style: none;
+    gap: 2rem;
+}
+
+.nav a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s;
+}
+
+.nav a:hover {
+    color: var(--color-primary);
+}
+
+/* Hero Section */
+.hero {
+    height: 80vh;
+    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('dosukoi_ramen_hero.png');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-content h1 {
+    font-size: 5rem;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+    text-shadow: 4px 4px 0 var(--color-primary);
+    animation: fadeInUp 1s ease-out;
+}
+
+.hero-content p {
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    animation: fadeInUp 1.2s ease-out;
+}
+
+.cta-button {
+    display: inline-block;
+    padding: 1rem 3rem;
+    background-color: var(--color-primary);
+    color: white;
+    text-decoration: none;
+    border-radius: 50px;
+    font-weight: bold;
+    font-size: 1.2rem;
+    transition: transform 0.3s, background-color 0.3s;
+    border: none;
+    cursor: pointer;
+    animation: bounce 2s infinite;
+}
+
+.cta-button:hover {
+    background-color: #b71c1c;
+    transform: scale(1.05);
+}
+
+.cta-button.secondary {
+    background-color: var(--color-secondary);
+}
+
+.cta-button.secondary:hover {
+    background-color: #000;
+}
+
+/* Sections */
+.section {
+    padding: 6rem 0;
+}
+
+.section h2 {
+    font-size: 3rem;
+    text-align: center;
+    margin-bottom: 3rem;
+    color: var(--color-secondary);
+    position: relative;
+}
+
+.section h2::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 5px;
+    background-color: var(--color-primary);
+    margin: 1rem auto 0;
+}
+
+.about {
+    text-align: center;
+    font-size: 1.2rem;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.card {
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: transform 0.3s;
+    border-top: 5px solid var(--color-primary);
+}
+
+.card:hover {
+    transform: translateY(-10px);
+}
+
+.card h3 {
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.contact {
+    background-color: var(--color-accent);
+    color: var(--color-secondary);
+    text-align: center;
+}
+
+/* Footer */
+.footer {
+    background-color: var(--color-secondary);
+    color: white;
+    text-align: center;
+    padding: 2rem;
+}
+
+/* Ranking & Map */
+#map {
+    height: 400px;
+    width: 100%;
+    z-index: 1;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.ranking-controls {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 0.5rem 1.5rem;
+    border: 2px solid var(--color-primary);
+    background: transparent;
+    color: var(--color-primary);
+    font-weight: bold;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.filter-btn:hover,
+.filter-btn.active {
+    background: var(--color-primary);
+    color: white;
+}
+
+.ranking-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.rank-badge {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: var(--color-accent);
+    color: var(--color-secondary);
+    padding: 0.5rem 1rem;
+    font-weight: bold;
+    border-bottom-right-radius: 10px;
+    font-family: var(--font-heading);
+}
+
+.reviewer {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: #666;
+    text-align: right;
+    font-style: italic;
+}
+
+/* Ura Mode specific overrides for new elements */
+body.ura-mode .filter-btn {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+body.ura-mode .filter-btn:hover,
+body.ura-mode .filter-btn.active {
+    background: var(--color-primary);
+    color: white;
+}
+
+body.ura-mode .reviewer {
+    color: #aaa;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes bounce {
+
+    0%,
+    20%,
+    50%,
+    80%,
+    100% {
+        transform: translateY(0);
+    }
+
+    40% {
+        transform: translateY(-10px);
+    }
+
+    60% {
+        transform: translateY(-5px);
+    }
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 2rem;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 400px;
+    border-radius: 10px;
+    text-align: center;
+    position: relative;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.auth-form input,
+.auth-form textarea {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-family: inherit;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .header {
+        padding: 0.8rem 1rem;
+    }
+
+    .mobile-menu-btn {
+        display: block;
+        margin-left: auto;
+        padding-left: 1rem;
+    }
+
+    .logo {
+        font-size: 1.2rem;
+        white-space: nowrap;
+    }
+
+    .logo-container {
+        gap: 0.5rem !important;
+        flex-shrink: 0;
+    }
+
+    .ura-toggle {
+        padding: 0.4rem 0.7rem;
+        font-size: 0.8rem;
+        white-space: nowrap;
+    }
+
+    .nav {
+        position: fixed;
+        top: 60px;
+        /* Adjusted for smaller header */
+        right: -100%;
+        width: 70%;
+        height: calc(100vh - 60px);
+        background: var(--color-secondary);
+        transition: right 0.3s;
+        padding: 2rem;
+        box-shadow: -5px 0 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .nav.active {
+        right: 0;
+    }
+
+    .nav ul {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .nav ul li a {
+        font-size: 1.2rem;
+    }
+
+    /* Mobile Text & Layout Fixes */
+    .hero {
+        height: 60vh;
+    }
+
+    .hero-content h1 {
+        font-size: 2rem;
+        line-height: 1.4;
+    }
+
+    .hero-content p {
+        font-size: 1rem;
+        padding: 0 1rem;
+        line-height: 1.6;
+    }
+
+    .section {
+        padding: 3rem 0;
+    }
+
+    .section h2 {
+        font-size: 1.8rem;
+        margin-bottom: 2.5rem;
+        line-height: 1.4;
+    }
+
+    .container {
+        padding: 0 1.2rem;
+    }
+
+    .about p,
+    .card p {
+        font-size: 1.05rem;
+        line-height: 1.8;
+        letter-spacing: 0.02rem;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Prevent messy breaks */
+    h1,
+    h2,
+    h3,
+    p {
+        word-break: break-word;
+        overflow-wrap: break-word;
+    }
+}
+
+/* Modal Tabs */
+.modal-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    color: #666;
+}
+
+.tab-btn.active {
+    border-bottom: 2px solid var(--color-primary);
+    color: var(--color-primary);
+    font-weight: bold;
+}

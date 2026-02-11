@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>戦果一覧 | どすこいラーメン部</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Rampart+One&family=Reggae+One&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .reports-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .report-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border-top: 5px solid var(--color-primary);
+        }
+
+        .report-meta {
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .report-rating {
+            color: #f1c40f;
+            font-size: 1.2rem;
+            margin: 0.5rem 0;
+        }
+
+        .report-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .tag {
+            font-size: 0.7rem;
+            background: #eee;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .tag-ura {
+            background: var(--color-accent);
+            color: white;
+        }
+
+        .report-review {
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: #333;
+            border-top: 1px dashed #ddd;
+            padding-top: 0.8rem;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <div class="logo-container" style="display: flex; align-items: center; gap: 1rem;">
+            <div class="logo">どすこい戦果一覧</div>
+        </div>
+        <div class="mobile-menu-btn" id="mobile-menu-btn">☰</div>
+        <nav class="nav" id="main-nav">
+            <ul>
+                <li><a href="index.html">トップ</a></li>
+                <li><a href="map.html">巡業マップ</a></li>
+                <li><a href="./members.html?v=4">部員</a></li>
+                <li id="report-nav" style="display: none;"><a href="./report.html">戦果を報告する</a></li>
+                <li><a href="#" id="login-trigger-header" style="font-size: 0.8rem; opacity: 0.7;">部員ログイン</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container section">
+        <a href="index.html" style="color: var(--color-primary); text-decoration: none; font-weight: bold;">← 戻る</a>
+        <h2 style="text-align: center; margin-bottom: 3rem;">蓄積された戦果</h2>
+
+        <div id="reports-loading" style="text-align: center; padding: 2rem;">
+            読み込み中...どすこい力を溜めています...
+        </div>
+
+        <div id="reports-container" class="reports-grid"></div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 Dosukoi Ramen Club. All Rights Reserved.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js?v=25"></script>
+    <script>
+        // 別途初期化（script.jsのsupabaseClientと共用できればベストだが、ここでは個別初期化）
+        const S_URL = 'https://gjvxavvhfdgnnudpqqfa.supabase.co';
+        const S_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdqdnhhdnZoZmRnbm51ZHBxcWZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA2NTIyNjgsImV4cCI6MjA4NjIyODI2OH0.WcVi6fT5q0gojOt4ZEOKzMm6xaO4qrvXvb7LtCZCN_8';
+        const sb = window.supabase.createClient(S_URL, S_KEY);
+
+        async function loadAllReports() {
+            const container = document.getElementById('reports-container');
+            const loading = document.getElementById('reports-loading');
+
+            try {
+                // First try with Join
+                let { data, error } = await sb
+                    .from('reports')
+                    .select('*, profiles(nickname)')
+                    .order('created_at', { ascending: false });
+
+                // If relationship error, fallback to flat select
+                if (error && error.message.includes("relationship")) {
+                    console.warn("Relationship not found, falling back to flat select.");
+                    const res = await sb
+                        .from('reports')
+                        .select('*')
+                        .order('created_at', { ascending: false });
+                    data = res.data;
+                    error = res.error;
+                }
+
+                console.log("Supabase Fetch Result:", { data, error });
+
+                if (error) throw error;
+
+                loading.style.display = 'none';
+                if (!data || data.length === 0) {
+                    container.innerHTML = '<p style="text-align:center; grid-column: 1/-1;">まだ報告がありません。最初の一杯を報告せよ！</p>';
+                    return;
+                }
+
+                data.forEach(rep => {
+                    const card = document.createElement('div');
+                    card.className = 'report-card';
+
+                    const nickname = rep.profiles ? rep.profiles.nickname : "不明な部員";
+                    const stars = "★".repeat(rep.rating || 0) + "☆".repeat(5 - (rep.rating || 0));
+                    const date = new Date(rep.created_at).toLocaleDateString('ja-JP');
+
+                    card.innerHTML = `
+                        <div class="report-meta">
+                            <span>👤 ${nickname}</span>
+                            <span>📅 ${date}</span>
+                        </div>
+                        <h3 style="margin: 0.5rem 0;">
+                            <a href="shop-details.html?shop_name=${encodeURIComponent(rep.shop_name)}" style="color: inherit; text-decoration: none;">${rep.shop_name}</a>
+                        </h3>
+                        <div style="margin-bottom: 0.5rem;">
+                            <a href="shop-details.html?shop_name=${encodeURIComponent(rep.shop_name)}" style="color: var(--color-primary); font-size: 0.8rem; font-weight: bold; text-decoration: none;">この店の戦果を見る →</a>
+                        </div>
+                        ${rep.photo_url ? `<div style="margin: 1rem 0; border-radius: 8px; overflow: hidden; height: 180px;"><img src="${rep.photo_url}" style="width: 100%; height: 100%; object-fit: cover;" alt="ラーメン写真"></div>` : ''}
+                        <div class="report-rating">${stars}</div>
+                        <div class="report-tags">
+                            <span class="tag tag-ura">${rep.shop_type || '未設定'}</span>
+                            <span class="tag">${rep.noodle_type || '未設定'}</span>
+                            <span class="tag">${rep.taste_tendency || '味不明'}</span>
+                        </div>
+                        <p class="report-review">${rep.review || '（コメントなし）'}</p>
+                    `;
+                    container.appendChild(card);
+                });
+
+            } catch (err) {
+                console.error(err);
+                loading.textContent = "読み込みに失敗しました。" + err.message;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadAllReports);
+    </script>
+</body>
+
+</html>

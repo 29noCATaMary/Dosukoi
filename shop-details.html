@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>店舗詳細 | どすこいラーメン部</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Rampart+One&family=Reggae+One&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .shop-details-container {
+            padding: 2rem 0;
+        }
+
+        .shop-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .shop-meta {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 1rem 0;
+            font-size: 1.1rem;
+        }
+
+        .rating-stars {
+            color: #f1c40f;
+            font-size: 1.5rem;
+        }
+
+        .reports-digest {
+            margin-top: 3rem;
+        }
+
+        .digest-item {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            margin-bottom: 1rem;
+            border-left: 5px solid var(--color-primary);
+        }
+
+        .digest-meta {
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #mini-map {
+            height: 300px;
+            width: 100%;
+            border-radius: 10px;
+            margin-top: 2rem;
+        }
+
+        .back-links {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <div class="logo">どすこい店舗詳細</div>
+        <nav class="nav">
+            <ul>
+                <li><a href="index.html">トップ</a></li>
+                <li><a href="reports-list.html">戦果一覧</a></li>
+                <li><a href="map.html">巡業マップ</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container section shop-details-container">
+        <div class="back-links">
+            <a href="reports-list.html" style="color: var(--color-primary); text-decoration: none; font-weight: bold;">←
+                戦果一覧に戻る</a>
+        </div>
+
+        <div id="shop-content">
+            <div id="loading" style="text-align: center; padding: 3rem;">
+                店舗情報を読み込んでいます...
+            </div>
+        </div>
+
+        <div id="mini-map"></div>
+
+        <div style="text-align: center; margin-top: 2rem;">
+            <a href="map.html" id="view-on-map-btn" class="cta-button"
+                style="text-decoration: none; display: inline-block;">この店を巡業マップで見る</a>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 Dosukoi Ramen Club. All Rights Reserved.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js?v=25"></script>
+    <script>
+        const S_URL = 'https://gjvxavvhfdgnnudpqqfa.supabase.co';
+        const S_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdqdnhhdnZoZmRnbm51ZHBxcWZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA2NTIyNjgsImV4cCI6MjA4NjIyODI2OH0.WcVi6fT5q0gojOt4ZEOKzMm6xaO4qrvXvb7LtCZCN_8';
+        const sb = window.supabase.createClient(S_URL, S_KEY);
+
+        async function loadShopDetails() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const shopName = urlParams.get('shop_name');
+
+            if (!shopName) {
+                document.getElementById('shop-content').innerHTML = '<p>店舗名が指定されていません。</p>';
+                return;
+            }
+
+            try {
+                // Fetch reports for this shop
+                let { data: reports, error } = await sb
+                    .from('reports')
+                    .select('*, profiles(nickname)')
+                    .eq('shop_name', shopName)
+                    .order('created_at', { ascending: false });
+
+                if (error && error.message.includes("relationship")) {
+                    const res = await sb.from('reports').select('*').eq('shop_name', shopName).order('created_at', { ascending: false });
+                    reports = res.data;
+                    error = res.error;
+                }
+
+                if (error) throw error;
+                if (!reports || reports.length === 0) {
+                    document.getElementById('shop-content').innerHTML = '<p>店舗情報が見つかりませんでした。</p>';
+                    return;
+                }
+
+                // Calculate Summary
+                const avgRating = (reports.reduce((acc, r) => acc + (r.rating || 0), 0) / reports.length).toFixed(1);
+                const genre = reports[0].shop_type || '未設定';
+                const latestReports = reports.slice(0, 3);
+
+                // Render Header
+                const content = document.getElementById('shop-content');
+                content.innerHTML = `
+                    <div class="shop-header">
+                        <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">${shopName}</h1>
+                        <div class="shop-meta">
+                            <span>ジャンル: <strong>${genre}</strong></span>
+                            <span class="rating-stars">平均: ${'★'.repeat(Math.round(avgRating))}${'☆'.repeat(5 - Math.round(avgRating))} (${avgRating})</span>
+                        </div>
+                    </div>
+
+                    <div class="reports-digest">
+                        <h2 style="border-bottom: 2px solid var(--color-primary); padding-bottom: 0.5rem; margin-bottom: 1.5rem;">最新の戦果（3件）</h2>
+                        <div id="digest-list"></div>
+                    </div>
+                `;
+
+                // Render Digest
+                const digestList = document.getElementById('digest-list');
+                latestReports.forEach(rep => {
+                    const nick = rep.profiles ? rep.profiles.nickname : "不明な部員";
+                    const date = new Date(rep.created_at).toLocaleDateString('ja-JP');
+                    const stars = "★".repeat(rep.rating || 0) + "☆".repeat(5 - (rep.rating || 0));
+
+                    const item = document.createElement('div');
+                    item.className = 'digest-item';
+                    item.innerHTML = `
+                        <div class="digest-meta">
+                            <span>👤 ${nick}</span>
+                            <span>📅 ${date}</span>
+                        </div>
+                        <div style="color: #f1c40f; margin-bottom: 0.5rem;">${stars}</div>
+                        ${rep.photo_url ? `<div style="margin: 0.5rem 0; border-radius: 5px; overflow: hidden; height: 120px;"><img src="${rep.photo_url}" style="width: 100%; height: 100%; object-fit: cover;" alt="ラーメン写真"></div>` : ''}
+                        <p style="font-size: 0.95rem; line-height: 1.5;">${rep.review || '（コメントなし）'}</p>
+                    `;
+                    digestList.appendChild(item);
+                });
+
+                // Initialize Mini Map
+                if (reports[0].lat && reports[0].lng) {
+                    const lat = reports[0].lat;
+                    const lng = reports[0].lng;
+                    const map = L.map('mini-map').setView([lat, lng], 15);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; OpenStreetMap contributors'
+                    }).addTo(map);
+                    L.marker([lat, lng]).addTo(map).bindPopup(`<b>${shopName}</b>`).openPopup();
+
+                    document.getElementById('view-on-map-btn').href = `map.html?lat=${lat}&lng=${lng}`;
+                } else {
+                    document.getElementById('mini-map').style.display = 'none';
+                }
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('shop-content').innerHTML = '<p>情報の読み込みに失敗しました。</p>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadShopDetails);
+    </script>
+</body>
+
+</html>

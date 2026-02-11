@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理画面 | どすこいラーメン部</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Rampart+One&family=Reggae+One&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .admin-panel {
+            background: white;
+            padding: 2rem;
+            margin: 2rem auto;
+            max-width: 800px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 1rem;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f8f9fa;
+        }
+
+        .delete-btn {
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .delete-btn:hover {
+            background: #cc0000;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <div class="logo">どすこい管理室</div>
+        <nav class="nav">
+            <ul>
+                <li><a href="index.html">ログアウト</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="admin-panel">
+            <h2>部員名簿</h2>
+            <table id="member-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>ニックネーム</th>
+                        <th>登録日</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- JS will populate this -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tbody = document.querySelector('#member-table tbody');
+            const members = JSON.parse(localStorage.getItem('dosukoi_members') || '[]');
+
+            // Check if admin (simple check, in reality secure server needed)
+            const currentUser = JSON.parse(sessionStorage.getItem('dosukoi_user'));
+            if (!currentUser || currentUser.id !== 'admin') {
+                alert('不正なアクセスです。');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            function renderMembers() {
+                tbody.innerHTML = '';
+                members.forEach((member, index) => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${member.id}</td>
+                        <td>${member.nickname}</td>
+                        <td>${member.joinedDate || '-'}</td>
+                        <td>
+                            ${member.id !== 'admin' ? `<button class="delete-btn" onclick="deleteMember('${member.id}')">除名</button>` : '管理者'}
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            window.deleteMember = (id) => {
+                if (confirm('本当に除名しますか？')) {
+                    const newMembers = members.filter(m => m.id !== id);
+                    localStorage.setItem('dosukoi_members', JSON.stringify(newMembers));
+                    location.reload();
+                }
+            };
+
+            renderMembers();
+        });
+    </script>
+</body>
+
+</html>

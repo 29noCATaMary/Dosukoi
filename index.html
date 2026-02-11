@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>どすこいラーメン部 | 力強く、啜る。</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Rampart+One&family=Reggae+One&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header class="header">
+        <div class="logo-container" style="display: flex; align-items: center; gap: 1rem;">
+            <div class="logo">どすこいラーメン部</div>
+            <button id="ura-toggle" class="ura-toggle" title="【裏】ラーメン以外の現場メシも記録">🍚 裏口</button>
+        </div>
+        <div class="mobile-menu-btn" id="mobile-menu-btn">☰</div>
+        <nav class="nav" id="main-nav">
+            <ul>
+                <li><a href="#about">どすこいについて</a></li>
+                <li><a href="#activities">活動</a></li>
+                <li><a href="./members.html?v=4" id="nav-members-link">部員</a></li>
+
+                <li><a href="#" id="login-trigger-header" style="font-size: 0.8rem; opacity: 0.7;">部員ログイン</a></li>
+                <li id="report-nav" style="display: none;"><a href="./report.html">戦果を報告する</a></li>
+                <li id="edit-profile-nav" style="display: none;"><a href="#" onclick="openEditProfile()"
+                        style="font-size: 0.8rem; opacity: 0.7;">プロフィール編集</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="hero-content">
+                <h1>一杯入魂。<br>どすこい。</h1>
+                <p>ラーメンを愛し、ラーメンに愛された者たちの集い。<br>ただのデジタルライフプランナーとは言わせない。</p>
+            </div>
+            <div class="hero-overlay"></div>
+        </section>
+
+        <!-- ... (omitted sections) ... -->
+
+
+
+        <section id="about" class="section about">
+            <div class="container">
+                <h2>どすこいラーメン部とは</h2>
+                <p>我々は日々、クライアントのデジタルライフをプランニングしている。<br>
+                    しかし、真にプランニングすべきは「今日の一杯」ではないのか？<br>
+                    麺と向き合い、スープと対話し、一杯の宇宙を感じる。<br>
+                    それが「どすこいラーメン部」だ。<br>
+                    <small>※一般の方は入部できません。我々の「どすこい」を感じてください。</small>
+                </p>
+            </div>
+        </section>
+
+        <section id="activities" class="section activities">
+            <div class="container">
+                <h2>活動内容</h2>
+                <p
+                    style="text-align: center; margin-bottom: 3rem; font-size: 1.1rem; max-width: 800px; margin-left: auto; margin-right: auto;">
+                    部員が実際に食べたラーメンの情報を、正直に共有することを目的としています。
+                </p>
+                <div class="grid">
+                    <div class="card">
+                        <h3>気分で探す</h3>
+                        <p>こってり／あっさり、がっつり／軽め、家系・二郎系・非二郎など、その日の気分で最高の一杯を探せます。</p>
+                    </div>
+                    <div class="card" onclick="location.href='reports-list.html'" style="cursor: pointer;">
+                        <h3>戦果一覧</h3>
+                        <p>部員たちがこれまでに食した一杯の記録。蓄積された「どすこいデータ」をすべて閲覧可能です。</p>
+                        <div
+                            style="margin-top: 1rem; color: var(--color-primary); font-weight: bold; font-size: 0.9rem;">
+                            戦果を見る →</div>
+                    </div>
+                    <div class="card">
+                        <h3>部員のおすすめ</h3>
+                        <p>実際に食べて「また行きたい」と思った店だけを紹介。広告やステマは一切なし、ガチの評価のみ。</p>
+                    </div>
+                    <div class="card">
+                        <h3>番付（ランキング）</h3>
+                        <p>味のジャンルやシーン別に、部員の評価に基づいた「用途別のおすすめ」が分かる番付を掲載しています。</p>
+                    </div>
+                    <div class="card" onclick="location.href='map.html'" style="cursor: pointer;">
+                        <h3>巡業マップ</h3>
+                        <p>部員が訪れた店を地図で確認。現在地周辺の「どすこいされた店」をリアルタイムで探すことも可能です。</p>
+                        <div
+                            style="margin-top: 1rem; color: var(--color-primary); font-weight: bold; font-size: 0.9rem;">
+                            マップを見る →</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <section id="ranking" class="section ranking">
+            <div class="container">
+                <h2>番付表（ランキング）</h2>
+                <div class="ranking-controls">
+                    <button class="filter-btn active" data-filter="all">総合</button>
+                    <button class="filter-btn" data-filter="豚骨魚介">豚骨魚介</button>
+                    <button class="filter-btn" data-filter="塩">塩</button>
+                    <button class="filter-btn" data-filter="激辛">激辛</button>
+                </div>
+                <div id="ranking-list" class="ranking-list grid">
+                    <!-- Dynamic Content -->
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="section contact">
+            <div class="container">
+                <h2>君も「どすこい」しないか？</h2>
+                <p>ラーメンへの熱い想いがあるなら、誰でも歓迎する。</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 Dosukoi Ramen Club. All Rights Reserved.</p>
+    </footer>
+
+    <div id="login-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div class="modal-tabs">
+                <button class="tab-btn active" onclick="switchTab('login')">ログイン</button>
+                <button class="tab-btn" onclick="switchTab('signup')">新規入部届け</button>
+            </div>
+
+            <!-- Login Form -->
+            <form id="login-form" class="auth-form">
+                <input type="text" id="login-id" placeholder="部員ID" required>
+                <input type="password" id="login-pass" placeholder="パスワード（6文字以上）" minlength="6" required>
+                <button type="submit" class="cta-button submit-btn">入室</button>
+            </form>
+
+            <!-- Signup Form (Enhanced) -->
+            <form id="signup-form" class="auth-form" style="display: none;">
+                <input type="text" id="signup-nickname" placeholder="ニックネーム（例：脂多め）" required>
+                <input type="text" id="signup-id" placeholder="POS番（7桁）" pattern="\d{7}" title="7桁の数字を入力してください"
+                    required>
+                <input type="password" id="signup-pass" placeholder="パスワード（6文字以上）" minlength="6" required>
+                <textarea id="signup-bio" placeholder="自己紹介（任意・熱い想いを語れ）" rows="3"></textarea>
+                <div style="margin: 10px 0; font-size: 0.9rem;">
+                    <label for="signup-photo">プロフィール画像:</label>
+                    <input type="file" id="signup-photo" accept="image/*" style="margin-top: 5px;">
+                </div>
+                <button type="submit" class="cta-button secondary submit-btn"
+                    style="width: auto; padding: 0.5rem 1rem; font-size: 0.9rem; margin: 1rem auto; display: block;">届出提出</button>
+            </form>
+        </div>
+    </div>
+    <!-- Edit Profile Modal -->
+    <div id="edit-profile-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeEditProfile()">&times;</span>
+            <h3 style="margin-bottom: 1.5rem; text-align: center;">プロフィール編集</h3>
+            <form id="edit-profile-form" class="auth-form">
+                <label style="font-size: 0.8rem; display: block; margin-bottom: 5px;">ニックネーム</label>
+                <input type="text" id="edit-nickname" placeholder="ニックネーム" required>
+
+                <label style="font-size: 0.8rem; display: block; margin-bottom: 5px;">自己紹介</label>
+                <textarea id="edit-bio" placeholder="自己紹介" rows="3"></textarea>
+
+                <div style="margin: 10px 0; font-size: 0.8rem;">
+                    <label for="edit-photo">新プロフィール画像（任意）:</label>
+                    <input type="file" id="edit-photo" accept="image/*" style="margin-top: 5px;">
+                </div>
+
+                <button type="submit" class="cta-button submit-btn">情報を更新</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js?v=25"></script>
+</body>
+
+</html>

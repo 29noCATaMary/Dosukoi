@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>部員名簿 | どすこいラーメン部</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Rampart+One&family=Reggae+One&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .members-header {
+            text-align: center;
+            padding: 2rem 0;
+            background: var(--color-primary);
+            color: white;
+            margin-bottom: 2rem;
+        }
+
+        .member-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 2rem;
+            padding: 2rem;
+        }
+
+        .profile-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+            position: relative;
+        }
+
+        .current-user-card {
+            border: 3px solid var(--color-primary);
+        }
+
+        .current-user-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: var(--color-primary);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .profile-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .profile-img {
+            width: 100px;
+            height: 100px;
+            background: #eee;
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            overflow: hidden;
+        }
+
+        .profile-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-name {
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: var(--color-secondary);
+        }
+
+        .profile-bio {
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 1rem;
+            color: white;
+            text-decoration: none;
+            font-size: 0.9rem;
+            border: 1px solid white;
+            padding: 5px 15px;
+            border-radius: 20px;
+        }
+
+        .back-link:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+
+<body>
+    <header class="members-header">
+        <h1>どすこい部員名簿</h1>
+        <p>共に切磋琢磨する同志たち。</p>
+        <a href="index.html" class="back-link">← 道場（トップ）に戻る</a>
+        <br>
+        <a href="#" id="logout-btn"
+            style="color: white; font-size: 0.8rem; margin-top: 10px; display: inline-block; opacity: 0.7;">修練を終える（ログアウト）</a>
+    </header>
+
+    <main class="container">
+        <div id="member-grid" class="member-grid">
+            <!-- Dynamic Content -->
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const SUPABASE_URL = 'https://gjvxavvhfdgnnudpqqfa.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdqdnhhdnZoZmRnbm51ZHBxcWZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA2NTIyNjgsImV4cCI6MjA4NjIyODI2OH0.WcVi6fT5q0gojOt4ZEOKzMm6xaO4qrvXvb7LtCZCN_8';
+
+        let supabaseClient = null;
+
+        if (window.supabase && window.supabase.createClient) {
+            try {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                console.log("✓ Supabase initialized");
+            } catch (e) {
+                console.error("Supabase Error:", e);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const container = document.getElementById('member-grid');
+            if (!container) return;
+
+            if (!supabaseClient) {
+                container.innerHTML = '<p style="text-align:center; color:#666;">サーバー接続エラー</p>';
+                return;
+            }
+
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                const currentUser = session ? session.user : null;
+                let isAdmin = false;
+
+                if (currentUser) {
+                    const { data: profile } = await supabaseClient
+                        .from('profiles')
+                        .select('is_admin')
+                        .eq('id', currentUser.id)
+                        .single();
+                    isAdmin = profile ? profile.is_admin : false;
+                }
+
+                const { data: members, error } = await supabaseClient
+                    .from('profiles')
+                    .select('*')
+                    .order('joined_date', { ascending: true });
+
+                if (error) {
+                    console.error("Error fetching members:", error);
+                    container.innerHTML = '<p style="text-align:center; color:#666;">名簿取得失敗</p>';
+                    return;
+                }
+
+                if (members && members.length > 0) {
+                    members.forEach(member => {
+                        const card = document.createElement('div');
+                        card.className = 'profile-card';
+                        const isMe = currentUser && currentUser.id === member.id;
+                        if (isMe) card.classList.add('current-user-card');
+
+                        const imgHTML = member.photo_url
+                            ? `<img src="${member.photo_url}" alt="${member.nickname}">`
+                            : '🍜';
+
+                        let deleteBtn = '';
+                        if (isAdmin && !isMe) {
+                            deleteBtn = `<button onclick="deleteMember('${member.id}', '${member.nickname}')" style="background:none; border:none; color:red; cursor:pointer; font-size:0.8rem; margin-top:10px;">[除名]</button>`;
+                        }
+
+                        card.innerHTML = `
+                            ${isMe ? '<div class="current-user-badge">You</div>' : ''}
+                            <div class="profile-img">${imgHTML}</div>
+                            <div class="profile-name">${member.nickname}</div>
+                            <div class="profile-bio">${member.bio || '自己紹介未記入。'}</div>
+                            ${deleteBtn}
+                        `;
+                        container.appendChild(card);
+                    });
+                } else {
+                    container.innerHTML = '<p style="text-align:center;">まだ部員はいません。</p>';
+                }
+
+                window.deleteMember = async (id, nickname) => {
+                    if (confirm(`${nickname}を部から除名しますか？（※復旧できません）`)) {
+                        const { error } = await supabaseClient
+                            .from('profiles')
+                            .delete()
+                            .eq('id', id);
+
+                        if (error) {
+                            alert("削除に失敗しました: " + error.message);
+                        } else {
+                            alert("除名しました。");
+                            location.reload();
+                        }
+                    }
+                };
+
+                const logoutBtn = document.getElementById('logout-btn');
+                if (!currentUser && logoutBtn) {
+                    logoutBtn.style.display = 'none';
+                }
+                if (logoutBtn && currentUser) {
+                    logoutBtn.onclick = async (e) => {
+                        e.preventDefault();
+                        if (confirm('ログアウトしますか？')) {
+                            await supabaseClient.auth.signOut();
+                            window.location.href = 'index.html';
+                        }
+                    };
+                }
+            } catch (err) {
+                console.error("Members page error:", err);
+                container.innerHTML = '<p style="text-align:center; color:#666;">エラーが発生しました</p>';
+            }
+        });
+    </script>
+</body>
+
+</html>
